@@ -4,9 +4,10 @@
         div{
             display:inline-block;
         }
+
         body{
             text-align: center;
-            background-color: #f2f2f2;
+            background-color: #dddddd;
             font-family: 'Courier New', Courier, monospace;
         }
 
@@ -15,7 +16,7 @@
             height: 50px;
             margin:50px;
             background-color: #444444;
-            color: #f2f2f2;
+            color: #dddddd;
 
             font-size: 1em;
             border: none;
@@ -35,9 +36,9 @@
 
     <br>
     <div id="boXSelection">
-        <button onclick="draw(1)">Best of 1</button>
-        <button onclick="draw(3)">Best of 3</button>
-        <button onclick="draw(5)">Best of 5</button>
+        <button onclick="boX = 3; draw()">Best of 3</button>
+        <button onclick="boX = 5; draw()">Best of 5</button>
+        <button onclick="boX = 7; draw()">Best of 7</button>
     </div>
 
     <script>
@@ -45,7 +46,7 @@
         /*
             CONSTANTS
         */  
-        let GRAPH_SIZE = {width: 1000, height: 500};
+        let GRAPH_SIZE = {width: 1000, height: 600};
         let MARGIN = {top: 50, bot : 50, left: 0, right: 0};
         let TOTAL_SIZE = {width: GRAPH_SIZE.width + MARGIN.left + MARGIN.right, height: GRAPH_SIZE.height + MARGIN.top + MARGIN.bot};
 
@@ -54,6 +55,9 @@
             INITIALIZATION 
         */ 
         var data;
+
+        var boX  = 3;
+        
         var svg = d3.select("#graphContainer")
             .append("svg")
                 .attr("width", TOTAL_SIZE.width)
@@ -74,7 +78,7 @@
         /*
             START
         */
-        draw(3);
+        draw();
 
     
 
@@ -86,6 +90,9 @@
             for(var i = 0; i < 1000; i ++){
                 output = output.slice(0); //Clone the array, to keep references separate. s
                 recursiveProbabiltities(0,0,boX, i, 1, output);
+                if(i % 10 == 0){
+                    console.log(`Calculation is ${i / 10}% done.`);
+                }
             }
             return output;
         }
@@ -105,8 +112,7 @@
                 for(var j = 0; j <= indexOfOutcome; j++ ){ 
                     output[j][i] += prob; 
                 }     
-            
-                
+
             }
         }
 
@@ -122,17 +128,39 @@
         }
 
         
-        function draw(q){
+        function draw(){
             svg.selectAll("path").remove();
             
-            data = calculateProbailities(q);
+            data = calculateProbailities(boX);
             
             svg.selectAll("path")
                 .data(data)
                 .enter()
                 .append("path")
                 .attr("d",areaFunction )
-                .attr("fill", (d , i) => {console.log(i) ; return `rgb(${i*20},${i*20},${i*20})`});
+                .attr("fill", createColor);
+        }
+
+        function createColor(d,i){ //d unused, matches inputs from .attr
+            index = 2*boX - i-1 ; //Really stupid way to invert the colors
+            var lightness;
+            var hue; 
+            var saturation; 
+            if(index < boX){
+                lightness = 25 + index * 15 / boX;
+                hue = "110";
+                saturation = "40";
+            }
+            else{
+                lightness = 25 + (2*boX - index) * 15/boX;
+                hue  = "360";
+                saturation = "55";
+            }
+
+            var color = `hsl(${hue},${saturation}%, ${lightness}%)`;
+            console.log(color);
+            return color;
+
         }
 
 
@@ -144,8 +172,8 @@
         }
         function updateSlider(e){
             var xPos = e.pageX - this.offsetLeft;
-
-            console.log(xPos)
+            console.log(data[1][xPos]);
+            //console.log(xPos)
         }
 
 
