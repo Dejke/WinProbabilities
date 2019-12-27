@@ -1,0 +1,30 @@
+div{
+    display:inline-block;
+}
+
+body{
+    text-align: center;
+    background-color: #dddddd; /*same as caret color, determined in JS*/
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.3em;
+}
+
+#boXSelection button{
+    width: 150px;
+    height: 50px;
+    margin:50px;
+    background-color: #444444;
+    color: #dddddd;
+
+    font-size: 1em;
+    border: none;
+    outline:none;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+#winrateDisplay{
+    
+}
+#boXSelection button:active{
+    background-color: #333333;
+}
