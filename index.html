@@ -1,182 +1,24 @@
 <head>
     <script src = "https://d3js.org/d3.v4.min.js"></script>
-    <style>
-        div{
-            display:inline-block;
-        }
-
-        body{
-            text-align: center;
-            background-color: #dddddd;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        #boXSelection button{
-            width: 150px;
-            height: 50px;
-            margin:50px;
-            background-color: #444444;
-            color: #dddddd;
-
-            font-size: 1em;
-            border: none;
-            outline:none;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        #boXSelection button:active{
-            background-color: #333333;
-        }
-
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     
     <div id="graphContainer"></div>
-
     <br>
+
+    <span id="winrateDisplay">chance to win a game = 50%</span>
+    <br>
+    <div id="barContainer"></div>
+    <br>
+    
     <div id="boXSelection">
-        <button onclick="boX = 3; draw()">Best of 3</button>
-        <button onclick="boX = 5; draw()">Best of 5</button>
-        <button onclick="boX = 7; draw()">Best of 7</button>
+        <button onclick="boX = 3; drawGraph()">best of 3</button>
+        <button onclick="boX = 5; drawGraph()">best of 5</button>
+        <button onclick="boX = 7; drawGraph()">best of 7</button>
     </div>
 
-    <script>
 
-        /*
-            CONSTANTS
-        */  
-        let GRAPH_SIZE = {width: 1000, height: 600};
-        let MARGIN = {top: 50, bot : 50, left: 0, right: 0};
-        let TOTAL_SIZE = {width: GRAPH_SIZE.width + MARGIN.left + MARGIN.right, height: GRAPH_SIZE.height + MARGIN.top + MARGIN.bot};
-
-        
-        /* 
-            INITIALIZATION 
-        */ 
-        var data;
-
-        var boX  = 3;
-        
-        var svg = d3.select("#graphContainer")
-            .append("svg")
-                .attr("width", TOTAL_SIZE.width)
-                .attr("height",TOTAL_SIZE.height)
-            .append("g")
-                .attr("transform", "translate("+MARGIN.left+", " + MARGIN.top+ ")"); 
-
-        var areaFunction = d3.area()
-            .x( (d,i) =>(i))
-            .y( (d) => GRAPH_SIZE.height)
-            .y1( (d) => ((1-d)*GRAPH_SIZE.height));
-            
-        var graphContainer = document.getElementById("graphContainer");
-        graphContainer.onmousemove = updateSlider;
-        graphContainer.onmouseleave = hideSlider;
-        graphContainer.onmouseenter = showSlider;
-
-        /*
-            START
-        */
-        draw();
-
-    
-
-        //For each index, goes through the probability of each event and adds it to the array at that index.
-        //Percentages are cumulative
-        function calculateProbailities(boX){
-            console.log("test");
-            var output = Array.from({length: 2*boX}, () => Array.from({length:1000}, () => 0));
-            for(var i = 0; i < 1000; i ++){
-                output = output.slice(0); //Clone the array, to keep references separate. s
-                recursiveProbabiltities(0,0,boX, i, 1, output);
-                if(i % 10 == 0){
-                    console.log(`Calculation is ${i / 10}% done.`);
-                }
-            }
-            return output;
-        }
-
-        
-        function recursiveProbabiltities(wins, losses, boX, i, prob, output){
-            var winrate = i /GRAPH_SIZE.width; 
-
-            if(wins < boX && losses < boX){
-                recursiveProbabiltities(wins + 1, losses, boX , i, prob * winrate, output);
-                recursiveProbabiltities(wins, losses + 1, boX, i, prob * (1-winrate), output);
-            }
-            else{
-                indexOfOutcome = outcomeIndex(wins,losses);
-                
-            
-                for(var j = 0; j <= indexOfOutcome; j++ ){ 
-                    output[j][i] += prob; 
-                }     
-
-            }
-        }
-
-        function outcomeIndex(wins, losses){
-            //In display order, top down. Ex: 30 31 32 23 13 03
-            if(wins > losses){
-                //boX = wins;
-                return losses; 
-            }
-            else{
-                return 2 * losses - wins - 1 ;
-            }
-        }
-
-        
-        function draw(){
-            svg.selectAll("path").remove();
-            
-            data = calculateProbailities(boX);
-            
-            svg.selectAll("path")
-                .data(data)
-                .enter()
-                .append("path")
-                .attr("d",areaFunction )
-                .attr("fill", createColor);
-        }
-
-        function createColor(d,i){ //d unused, matches inputs from .attr
-            index = 2*boX - i-1 ; //Really stupid way to invert the colors
-            var lightness;
-            var hue; 
-            var saturation; 
-            if(index < boX){
-                lightness = 25 + index * 15 / boX;
-                hue = "110";
-                saturation = "40";
-            }
-            else{
-                lightness = 25 + (2*boX - index) * 15/boX;
-                hue  = "360";
-                saturation = "55";
-            }
-
-            var color = `hsl(${hue},${saturation}%, ${lightness}%)`;
-            console.log(color);
-            return color;
-
-        }
-
-
-        function showSlider(){
-            
-        }
-        function hideSlider(){
-
-        }
-        function updateSlider(e){
-            var xPos = e.pageX - this.offsetLeft;
-            console.log(data[1][xPos]);
-            //console.log(xPos)
-        }
-
-
-
-    </script>
+    <script src="script.js"></script>
 </body>
